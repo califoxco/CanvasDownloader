@@ -6,8 +6,8 @@ chrome.runtime.onMessage.addListener(function (request) {
     }
     else if (request.popupMessage != null){
         if (newLink !=null){
-            alert("Starting to Download")
-            chrome.runtime.sendMessage({downloadInit: true});
+            var name = (document.getElementsByTagName("title")[0]).innerHTML;
+            chrome.runtime.sendMessage({downloadInit: true, filename: name})
         }
         else {
             alert("nothing to download")

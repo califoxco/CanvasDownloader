@@ -7,3 +7,18 @@ document.addEventListener('DOMContentLoaded', function(){
         })
     }
 },false)
+
+chrome.runtime.onMessage.addListener(function (request) {
+    if (request.dprogress){
+        console.log(Math.ceil(100*(request.dprogress/request.total)))
+        document.querySelector('progress').value = Math.ceil(100*(request.dprogress/request.total))
+    }
+    else if (request.downloadInit){
+        (document.getElementsByTagName("button")[0]).innerHTML = "downloading"
+    }
+
+    else if (request.downloadCompleted){
+        document.querySelector('progress').value = 0
+        (document.getElementsByTagName("button")[0]).innerHTML = "download"
+    }
+})
