@@ -1,13 +1,13 @@
 var urls = []
 var fileurls = []
-var listenerStatus = true; 
-var binaryData = [];
-var finishedDownloading = true;
-var lastClip=1;
-var progress = 1;
-var fileName = "";
+var listenerStatus = true
+var binaryData = []
+var finishedDownloading = true
+var lastClip=1
+var progress = 1
+var fileName = ""
 
-var MAXFILENUM = 2048;
+var MAXFILENUM = 2048
 
 
 chrome.webRequest.onSendHeaders.addListener(function(wr){
@@ -26,26 +26,17 @@ chrome.webRequest.onSendHeaders.addListener(function(wr){
     types:["xmlhttprequest"]
 }, ["requestHeaders"])
 
-
-/* chrome.runtime.onMessage.addListener(function (request) {
-    if (request.downloadInit){
-        chrome.downloads.download({
-        url: urls[urls.length-1]
-        })
-    }
-}) */
-
 chrome.runtime.onMessage.addListener(function (request) {
     if (request.downloadInit){
         finishedDownloading = false
         listenerStatus = false
         fileName = request.filename
         lastClip = findLastClip(1,MAXFILENUM, urls[urls.length-1])
-        console.log("final answer is "+lastClip);
+        console.log("final answer is "+lastClip)
 
         // create file urls
          for(var i = 1; i<=lastClip; i++){
-            fileurls.push(urls[urls.length-1].replace(/seg-\d{1,2}/,("seg-"+i)));
+            fileurls.push(urls[urls.length-1].replace(/seg-\d{1,2}/,("seg-"+i)))
         }
         console.log({fileurls}) 
 
@@ -67,15 +58,16 @@ function download(index){
         if (xhr.readyState == 4 && xhr.status === 200) {
 
             var blob = xhr.response
-            binaryData[index] = blob;
+            binaryData[index] = blob
             console.log("currentStatus : "+xhr.status)
             console.log("completed "+ index)
-            progress++;
-            checkcompletion();
+            progress++
+            checkcompletion()
         }
         else if ((xhr.status === 404 || xhr.status === 400)){
-            progress++;
+            progress++
             console.log("failed to download clip: " + index)
+            checkcompletion()
         }
     }
     console.log("starting download "+index)
@@ -85,21 +77,21 @@ function download(index){
 
 function checkcompletion(){
     console.log("progress is "+progress)
-    chrome.runtime.sendMessage({dprogress: progress, total:lastClip});
+    chrome.runtime.sendMessage({dprogress: progress, total:lastClip})
     if (progress == lastClip){
-        var a = document.createElement('a');
+        var a = document.createElement('a')
         a.href = window.URL.createObjectURL(new Blob(binaryData, {type: "mp4"}))
-        a.download = fileName+".mp4";
+        a.download = fileName+".mp4"
         a.dispatchEvent(new MouseEvent('click'))
-        chrome.runtime.sendMessage({downloadCompleted: true});
+        chrome.runtime.sendMessage({downloadCompleted: true})
         urls = []
         fileurls = []
-        listenerStatus = true; 
-        binaryData = [];
-        finishedDownloading = true;
-        lastClip=1;
-        progress=1;
-        fileName = "";
+        listenerStatus = true
+        binaryData = []
+        finishedDownloading = true
+        lastClip=1
+        progress=1
+        fileName = ""
     }
 }
 
@@ -130,55 +122,3 @@ function findLastClip(low, high, myurl){
     xhr.send()
     return temp
 }
-
-/* 
-
-function startDownload(counter){
-    if (counter < fileurls.length){
-        var xhr = new XMLHttpRequest()
-        listenerStatus = false
-        xhr.open('GET', fileurls[counter], true)
-        xhr.responseType = "blob"
-        xhr.onreadystatechange = function (e) {
-            if (xhr.readyState == 4 && xhr.status === 200) {
-
-                var blob = xhr.response
-                binaryData.push(blob);
-                console.log("currentStatus : "+xhr.status)
-                console.log("completed "+ counter)
-                startDownload(counter+1)
-            }
-            else if ((xhr.status === 404 || xhr.status === 400) && !finishedDownloading){
-                finishedDownloading = true;
-                var a = document.createElement('a');
-                a.href = window.URL.createObjectURL(new Blob(binaryData, {type: "mp4"}))
-                var fileName = Date.now()+".mp4";
-                a.download = fileName;
-                a.dispatchEvent(new MouseEvent('click'))
-                listenerStatus = true;
-                urls = []
-                fileurls = []
-                binaryData = [];
-                return
-            }
-        }
-        console.log("starting download "+counter)
-        xhr.send()
-    }
-    else {
-        if (!finishedDownloading){
-            finishedDownloading = true;
-            var a = document.createElement('a');
-            a.href = window.URL.createObjectURL(new Blob(binaryData, {type: "mp4"}))
-            var fileName = Date.now()+".mp4";
-            a.download = fileName;
-            a.dispatchEvent(new MouseEvent('click'))
-            listenerStatus = true
-            urls = []
-            fileurls = []
-            binaryData = [];
-            return
-        }
-    }
-}
- */

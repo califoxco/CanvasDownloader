@@ -19,6 +19,5 @@ chrome.runtime.onMessage.addListener(function (request) {
 
     else if (request.downloadCompleted){
         document.querySelector('progress').value = 0
-        (document.getElementsByTagName("button")[0]).innerHTML = "download"
     }
 })
